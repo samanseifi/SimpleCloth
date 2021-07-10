@@ -8,8 +8,8 @@
 #include <boost/test/unit_test.hpp>
 
 
-#include "Vec3.h"
-#include "ArrayT.h"
+#include "../includes/Vec3.h"
+#include "../includes/ArrayT.h"
 
 
 BOOST_AUTO_TEST_SUITE(my_testsuite)

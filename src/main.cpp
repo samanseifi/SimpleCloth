@@ -1,5 +1,17 @@
-/* Simulating a simple linear beam */
-
+/* Simulating a simple cloth using mass spring model
+ *  (0,0)  (1,0)  (2,0)
+ *      O----O----O----
+ *      |\  /|\  /|\
+ *      | \/ | \/ | \
+ *      | /\ | /\ |
+ *      |/  \|/  \|/
+ *      O----O----O--
+ * (1,0)|\  /|(1,1) (2,1)
+ *      | \/ |
+ *      |
+ *      Note: the model only shows structure and shear springs.
+ *
+ */
 #include "Vec3.h"
 #include "ArrayT.h"
 
@@ -48,7 +60,7 @@ ArrayT<Vec3> SetToScaled(ArrayT<Vec3> arr, double scale) {
     return scaledArr;
 }
 
-/* Create the connectivity structure */
+/** The connectivity structure creates an array of connected indices: an array of vectors */
 ArrayT<vector<int>> ConnectivityStructure(int N) {
 
     ArrayT<vector<int>> Connectivity(N*N);
@@ -103,7 +115,6 @@ ArrayT<vector<int>> ConnectivityStructure(int N) {
     }
 
     return Connectivity;
-
 }
 
 /* Calculate internal spring forces */
@@ -136,8 +147,8 @@ void gravity_force(double mass, ArrayT<Vec3> &force_gravity) {
     }
 }
 
-
-void write_csv(std::string filename, ArrayT<Vec3> dataset){
+/* Writing the output in a csv */
+void write_csv(const std::string& filename, ArrayT<Vec3> dataset){
 
     // Create an output filestream object
     std::ofstream myFile(filename);
@@ -156,7 +167,6 @@ void write_csv(std::string filename, ArrayT<Vec3> dataset){
     // Close the file
     myFile.close();
 }
-
 
 
 int main() {
@@ -183,12 +193,13 @@ int main() {
     /* Create the mapping between connected nodes */
     ArrayT<vector<int>> Indices = ConnectivityStructure(N);
 
+    /* Pre-allocate arrays */
     ArrayT<Vec3> pos0, vel, acc;
     pos0.Dimension(N*N);
     vel.Dimension(N*N);
     acc.Dimension(N*N);
 
-    /* Initialization */
+    /* Initialization! */
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < N; j++) {
             /* Initialize kinematic information Coord, Velocity and Acceleration */
@@ -198,6 +209,7 @@ int main() {
         }
     }
 
+    // Write the initial configuration of nodes
     write_csv("pos_init.csv", pos0);
 
     // time zero!
@@ -218,6 +230,7 @@ int main() {
     ArrayT<Vec3> pos_old;
     pos_old = pos0;
 
+    // counter for exporting data
     int counter = 0;
 
     // Time stepping!
@@ -231,11 +244,13 @@ int main() {
         /* Adding forces together */
         forces = AddArrays(force_int, force_vis, force_gravity);
 
-        /** Verlet Integration scheme */
+        /** Verlet Integration scheme: */
         /* calculate accelerations */
         acc = SetToScaled(forces, 1.0/m);
         acc[0] = Vec3(0,0,0);       /**< keep the fixed BC corner top-left  */
         acc[N-1] = Vec3(0,0,0);     /**< keep the fixed BC corner top-right */
+
+        /** Condition for letting go of the rope at time t = 1000 */
         if (t < 1000)
             acc[N*(N-1)] = Vec3(0,0,0);
 
@@ -243,6 +258,8 @@ int main() {
         pos = AddArrays(SetToScaled(pos, 2.0), SetToScaled(pos_old, -1), SetToScaled(acc, dt*dt));
         pos[0] = pos0[0];           /**< keep the fixed BC corner top-left  */
         pos[N-1] = pos0[N-1];       /**< keep the fixed BC corner top-right */
+
+        /** Condition for letting go of the rope at time t = 1000 */
         if (t < 1000)
             pos[N*(N-1)] = pos0[N*(N-1)];
 
@@ -256,10 +273,10 @@ int main() {
 
         /* create outputs */
         if (counter % 10000 == 0) {
-            std::string pos_filename = "pos_t" + std::to_string(t) + ".csv";
+            std::string pos_filename = "pos_t" + std::to_string(int(t)) + ".csv";
             write_csv(pos_filename, pos);
 
-            std::string force_filename = "force_t" + std::to_string(t) + ".csv";
+            std::string force_filename = "force_t" + std::to_string(int(t)) + ".csv";
             write_csv(force_filename, forces);
         }
     }
