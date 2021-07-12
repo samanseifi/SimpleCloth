@@ -21,152 +21,28 @@
 using namespace std;
 
 /** Adding two arrays of containing cartesian vectors Vec3 */
-ArrayT<Vec3> AddArrays(ArrayT<Vec3> arr1, ArrayT<Vec3> arr2) {
-
-    /* First check the size match */
-    assert(arr1.Length() == arr2.Length());
-
-    ArrayT<Vec3> vecSum;
-
-    for (int i = 0; i < arr1.Length(); i++) {
-        vecSum.Insert(arr1[i] + arr2[i]);
-    }
-
-    return vecSum;
-}
+ArrayT<Vec3> AddArrays(ArrayT<Vec3> arr1, ArrayT<Vec3> arr2);
 
 /** Adding three arrays of containing cartesian vectors */
-ArrayT<Vec3> AddArrays(ArrayT<Vec3> arr1, ArrayT<Vec3> arr2, ArrayT<Vec3> arr3) {
-    assert(arr1.Length() == arr2.Length() && arr2.Length() == arr3.Length());
-
-    ArrayT<Vec3> vecSum;
-
-    for (int i = 0; i < arr1.Length(); i++) {
-        vecSum.Insert(arr1[i] + arr2[i] + arr3[i]);
-    }
-
-    return vecSum;
-}
+ArrayT<Vec3> AddArrays(ArrayT<Vec3> arr1, ArrayT<Vec3> arr2, ArrayT<Vec3> arr3);
 
 /* Set each vector of the array to scaled */
-ArrayT<Vec3> SetToScaled(ArrayT<Vec3> arr, double scale) {
-
-    ArrayT<Vec3> scaledArr;
-    scaledArr.Dimension(arr.Length());
-
-    for (int i = 0; i < arr.Length(); i++) {
-        scaledArr[i] = arr[i]*(scale);
-    }
-    return scaledArr;
-}
+ArrayT<Vec3> SetToScaled(ArrayT<Vec3> arr, double scale);
 
 /** The connectivity structure creates an array of connected indices: an array of vectors */
-ArrayT<vector<int>> ConnectivityStructure(int N) {
-
-    ArrayT<vector<int>> Connectivity(N*N);
-
-    /** Structure springs connections */
-    /* Horizontals */
-    for (int i = 0; i < N-1; i++) {
-        for (int j = 0; j < N; j++) {
-            Connectivity[N*j + i].push_back(N*j + i+1);
-            Connectivity[N*j + i+1].push_back(N*j + i);
-        }
-    }
-    /* Verticals */
-    for (int i = 0; i < N; i++) {
-        for (int j = 0; j < N-1; j++) {
-            Connectivity[N*j + i].push_back(N*(j+1) + i);
-            Connectivity[N*(j+1) + i].push_back(N*j + i);
-        }
-    }
-
-    /** Shear springs connections */
-    /* left-to-rights */
-    for (int i = 0; i < N-1; i++) {
-        for (int j = 0; j < N-1; j++) {
-            Connectivity[N*j + i].push_back(N*(j+1) + i+1);
-            Connectivity[N*(j+1) + i+1].push_back(N*j + i);
-        }
-    }
-
-    /* right-to-left */
-    for (int i = 1; i < N; i++) {
-        for (int j = 0; j < N-1; j++) {
-            Connectivity[N*j + i].push_back(N*(j+1) + i-1);
-            Connectivity[N*(j+1) + i-1].push_back(N*j + i);
-        }
-    }
-
-    /** Bending springs */
-    /* Horizontals */
-    for (int i = 0; i < N-2; i++) {
-        for (int j = 0; j < N; j++) {
-            Connectivity[N*j + i].push_back(N*j + i+2);
-            Connectivity[N*j + i+2].push_back(N*j + i);
-        }
-    }
-    /* verticals*/
-    for (int i = 0; i < N; i++) {
-        for (int j = 0; j < N-2; j++) {
-            Connectivity[N*j + i].push_back(N*(j+2) + i);
-            Connectivity[N*(j+2) + i].push_back(N*j + i);
-        }
-    }
-
-    return Connectivity;
-}
+ArrayT<vector<int>> ConnectivityStructure(int N);
 
 /* Calculate internal spring forces */
-void internal_forces(ArrayT<vector<int>> indices, ArrayT<Vec3> pos, ArrayT<Vec3> pos0, double k, ArrayT<Vec3> &force_int) {
-    for (int i = 0; i < pos.Length(); i++) {
-        Vec3 f_i(0,0,0);
-        for (size_t j = 0; j < indices[i].size(); j++) {
-//            if ((pos[i] - pos[indices[i][j]]).Magnitude() > 1.1*(pos0[i] - pos0[indices[i][j]]).Magnitude()) {
-//                k *= 1.1;
-//            }
-            f_i += (pos[i] - pos[indices[i][j]]).UnitVec()*(-k * ((pos[i] - pos[indices[i][j]]).Magnitude() - (pos0[i] - pos0[indices[i][j]]).Magnitude()));
-        }
-        force_int[i] = f_i;
-    }
-}
+void internal_forces(ArrayT<vector<int>> indices, ArrayT<Vec3> pos, ArrayT<Vec3> pos0, double k, ArrayT<Vec3> &force_int);
 
 /* Viscous forces! */
-void viscous_forces(ArrayT<Vec3> vel, double vis_coeff, ArrayT<Vec3> &force_vis) {
-
-    for (int i = 0; i < vel.Length(); i++) {
-        force_vis[i] = vel[i]*(-vis_coeff);
-    }
-}
+void viscous_forces(ArrayT<Vec3> vel, double vis_coeff, ArrayT<Vec3> &force_vis);
 
 /* Applying external forces */
-void gravity_force(double mass, ArrayT<Vec3> &force_gravity) {
-    for (int i = 0; i < force_gravity.Length(); i++) {
-        Vec3 g = {0, 0, -9.8};
-        force_gravity[i] = g*mass;
-    }
-}
+void gravity_force(double mass, ArrayT<Vec3> &force_gravity);
 
 /* Writing the output in a csv */
-void write_csv(const std::string& filename, ArrayT<Vec3> dataset){
-
-    // Create an output filestream object
-    std::ofstream myFile(filename);
-
-    // Send column names to the stream
-    myFile << "ID" << "," << "x" << "," << "y" << "," << "z";
-    myFile << "\n";
-
-    for(int j = 0; j < dataset.Length(); ++j)
-    {
-        myFile << j << "," << dataset[j].x << "," <<  dataset[j].y << "," << dataset[j].z;
-        myFile << "\n";
-
-    }
-
-    // Close the file
-    myFile.close();
-}
+void write_csv(const std::string& filename, ArrayT<Vec3> dataset);
 
 
 int main() {
@@ -251,8 +127,7 @@ int main() {
         acc[N-1] = Vec3(0,0,0);     /**< keep the fixed BC corner top-right */
 
         /** Condition for letting go of the rope at time t = 1000 */
-        if (t < 1000)
-            acc[N*(N-1)] = Vec3(0,0,0);
+        if (t < 1000) acc[N*(N-1)] = Vec3(0,0,0);
 
         /* calculate positions */
         pos = AddArrays(SetToScaled(pos, 2.0), SetToScaled(pos_old, -1), SetToScaled(acc, dt*dt));
@@ -260,8 +135,7 @@ int main() {
         pos[N-1] = pos0[N-1];       /**< keep the fixed BC corner top-right */
 
         /** Condition for letting go of the rope at time t = 1000 */
-        if (t < 1000)
-            pos[N*(N-1)] = pos0[N*(N-1)];
+        if (t < 1000) pos[N*(N-1)] = pos0[N*(N-1)];
 
         /* update the old position vector */
         pos_old = pos;
@@ -282,4 +156,156 @@ int main() {
     }
 
     return 0;
+}
+
+
+ArrayT<Vec3> AddArrays(ArrayT<Vec3> arr1, ArrayT<Vec3> arr2) {
+
+    /* First check the size match */
+    assert(arr1.Length() == arr2.Length());
+
+    ArrayT<Vec3> vecSum;
+
+    for (int i = 0; i < arr1.Length(); i++) {
+        vecSum.Insert(arr1[i] + arr2[i]);
+    }
+
+    return vecSum;
+}
+
+ArrayT<Vec3> AddArrays(ArrayT<Vec3> arr1, ArrayT<Vec3> arr2, ArrayT<Vec3> arr3) {
+    assert(arr1.Length() == arr2.Length() && arr2.Length() == arr3.Length());
+
+    ArrayT<Vec3> vecSum;
+
+    for (int i = 0; i < arr1.Length(); i++) {
+        vecSum.Insert(arr1[i] + arr2[i] + arr3[i]);
+    }
+
+    return vecSum;
+}
+
+ArrayT<Vec3> SetToScaled(ArrayT<Vec3> arr, double scale) {
+
+    ArrayT<Vec3> scaledArr;
+    scaledArr.Dimension(arr.Length());
+
+    for (int i = 0; i < arr.Length(); i++) {
+        scaledArr[i] = arr[i]*(scale);
+    }
+    return scaledArr;
+}
+
+/* Creating an array of STL vectors containing nodal (array indicies) connected to the index */
+ArrayT<vector<int>> ConnectivityStructure(int N) {
+
+    ArrayT<vector<int>> Connectivity(N*N);
+
+    /** Structure springs connections */
+    /*@{*/
+    /* Horizontals: (i, j)<--->(i+1, j)  */
+    for (int i = 0; i < N-1; i++) {
+        for (int j = 0; j < N; j++) {
+            Connectivity[N*j + i].push_back(N*j + i+1);
+            Connectivity[N*j + i+1].push_back(N*j + i);
+        }
+    }
+    /* Verticals: (i, j)<--->(i, j+1) */
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N-1; j++) {
+            Connectivity[N*j + i].push_back(N*(j+1) + i);
+            Connectivity[N*(j+1) + i].push_back(N*j + i);
+        }
+    } // End of structure springs
+    /*@}*/
+
+    /** Shear springs connections */
+    /*@{*/
+    /* left-to-rights: (i, j)<--->(i+1, j+1) */
+    for (int i = 0; i < N-1; i++) {
+        for (int j = 0; j < N-1; j++) {
+            Connectivity[N*j + i].push_back(N*(j+1) + i+1);
+            Connectivity[N*(j+1) + i+1].push_back(N*j + i);
+        }
+    }
+    /* right-to-left: (i, j)<--->(i-1, j+1) */
+    for (int i = 1; i < N; i++) {
+        for (int j = 0; j < N-1; j++) {
+            Connectivity[N*j + i].push_back(N*(j+1) + i-1);
+            Connectivity[N*(j+1) + i-1].push_back(N*j + i);
+        }
+    } // End of shear springs
+    /*@}*/
+
+    /** Bending springs */
+    /*@{*/
+    /* Horizontals: (i, j)<--->(i+2, j) */
+    for (int i = 0; i < N-2; i++) {
+        for (int j = 0; j < N; j++) {
+            Connectivity[N*j + i].push_back(N*j + i+2);
+            Connectivity[N*j + i+2].push_back(N*j + i);
+        }
+    }
+    /* verticals: (i, j)<--->(i, j+2) */
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N-2; j++) {
+            Connectivity[N*j + i].push_back(N*(j+2) + i);
+            Connectivity[N*(j+2) + i].push_back(N*j + i);
+        }
+    } // End of bending springs
+    /*@}*/
+
+    return Connectivity;
+}
+
+/* calculates internal fores */
+void internal_forces(ArrayT<vector<int>> indices, ArrayT<Vec3> pos, ArrayT<Vec3> pos0, double k, ArrayT<Vec3> &force_int) {
+    for (int i = 0; i < pos.Length(); i++) {
+        Vec3 f_i(0,0,0);
+        for (size_t j = 0; j < indices[i].size(); j++) {
+            /* Super-elasticity resolution: */
+            // if the spring is over stretched make it stiffer!
+            if ((pos[i] - pos[indices[i][j]]).Magnitude() > 1.1*(pos0[i] - pos0[indices[i][j]]).Magnitude()) {
+                k *= 1.1;
+            }
+            f_i += (pos[i] - pos[indices[i][j]]).UnitVec()*(-k * ((pos[i] - pos[indices[i][j]]).Magnitude() - (pos0[i] - pos0[indices[i][j]]).Magnitude()));
+        }
+        force_int[i] = f_i;
+    }
+}
+
+/* calculates the viscous forces */
+void viscous_forces(ArrayT<Vec3> vel, double vis_coeff, ArrayT<Vec3> &force_vis) {
+    for (int i = 0; i < vel.Length(); i++) {
+        force_vis[i] = vel[i]*(-vis_coeff);
+    }
+}
+
+/* calculates the gravity (external) forces */
+void gravity_force(double mass, ArrayT<Vec3> &force_gravity) {
+    for (int i = 0; i < force_gravity.Length(); i++) {
+        Vec3 g = {0, 0, -9.8};      // Earth's gravity vector
+        force_gravity[i] = g*mass;
+    }
+}
+
+/* storing in CSV files */
+void write_csv(const string &filename, ArrayT<Vec3> dataset) {
+
+    // Create an output filestream object
+    std::ofstream myFile(filename);
+
+    // Send column names to the stream
+    myFile << "ID" << "," << "x" << "," << "y" << "," << "z";
+    myFile << "\n";
+
+    for(int j = 0; j < dataset.Length(); ++j)
+    {
+        myFile << j << "," << dataset[j].x << "," <<  dataset[j].y << "," << dataset[j].z;
+        myFile << "\n";
+
+    }
+
+    // Close the file
+    myFile.close();
 }
