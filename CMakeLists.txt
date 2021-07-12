@@ -25,9 +25,9 @@ else()
     add_compile_options(-Wall -Wextra -pedantic)
 endif()
 
-
-find_package(GSL REQUIRED)
-link_libraries(GSL::gsl GSL::gslcblas)
+# Deactivated for Mac build
+#find_package(GSL REQUIRED)
+#link_libraries(GSL::gsl GSL::gslcblas)
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 
