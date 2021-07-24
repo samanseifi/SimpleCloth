@@ -11,7 +11,7 @@ All the nodes (mass points) are indexed and stored into an array such that the n
 
 The equations of motion is being solved using Verlet time integration scheme.
 
-<img scr="https://github.com/samanseifi/SimpleCloth/blob/main/gifs/hang_and_loose_cloth.gif" width="500"/>
+[!alt](https://github.com/samanseifi/SimpleCloth/blob/main/gifs/hang_and_loose_cloth.gif)
 
 
 [1] Provot, Xavier. "[Deformation constraints in a mass-spring model to describe rigid cloth behaviour](https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.84.1732&rep=rep1&type=pdf)." Graphics interface. Canadian Information Processing Society, 1995.
