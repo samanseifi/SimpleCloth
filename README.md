@@ -13,5 +13,8 @@ The equations of motion is being solved using Verlet time integration scheme.
 
 ![alt](https://github.com/samanseifi/SimpleCloth/blob/main/gifs/hang_and_loose_cloth.gif)
 
+Nodal positions are stored in `.csv` files at specific time steps. A MATLAB code (`scripts\plotting.m`) using Delauny triangulation of initial configuration and `trisurf` function visualizes the simulation.
+
+
 
 [1] Provot, Xavier. "[Deformation constraints in a mass-spring model to describe rigid cloth behaviour](https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.84.1732&rep=rep1&type=pdf)." Graphics interface. Canadian Information Processing Society, 1995.
