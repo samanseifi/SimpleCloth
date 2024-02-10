@@ -1,16 +1,13 @@
-# see https://cmake.org/cmake/help/latest/module/FindBoost.html
-set(Boost_USE_STATIC_LIBS OFF) #enable dynamic linking
+# Assuming GoogleTest has already been made available in the main CMakeLists.txt
 
-# search for unit_test_framework
-find_package(Boost REQUIRED COMPONENTS unit_test_framework)
+# Create a test executable target from tests.cpp
+add_executable(SimpleCloth_test tests.cpp)
 
-include_directories(${Boost_INCLUDE_DIR})
+# Link GoogleTest libraries to the new target
+target_link_libraries(SimpleCloth_test gtest_main)
 
-# create a cmake_testapp_boost target from tests.cpp
-add_executable(SimpleCloth_boost tests.cpp)
+# Optionally, if you have additional libraries your tests need to link against, include them here
+# target_link_libraries(SimpleCloth_test gtest_main your_additional_libraries)
 
-# link Boost libraries to the new target
-target_link_libraries(SimpleCloth_boost ${Boost_LIBRARIES})
-
-# link Boost with code library
-target_link_libraries(SimpleCloth_boost)
+# Register the executable with CTest
+add_test(NAME SimpleCloth_test COMMAND SimpleCloth_test)
