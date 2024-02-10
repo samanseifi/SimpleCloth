@@ -1,0 +1,57 @@
+# CMake generated files and directories
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.make
+
+# Build directories
+build/
+Release/
+Debug/
+bin/
+
+# Executables and dynamic/static libraries
+*.exe
+*.dll
+*.so
+*.dylib
+*.lib
+*.a
+*.out
+
+# Object files
+*.o
+*.obj
+
+# Backup files
+*~
+*.bak
+
+# Other files and directories to ignore
+.DS_Store
+.vs/
+.vscode/
+*.code-workspace
+*.swp
+*.swo
+/tmp
+
+# Ignore specific config files that may contain sensitive information
+*.config
+
+# Ignore IDE specific files
+.idea/
+*.sublime-workspace
+
+# If you're using Doxygen, ignore its generated files
+html/
+latex/
+
+# Ignore dependency directories (uncomment if applicable)
+# node_modules/
+# vendor/
+
+# Ignore user-specific files (e.g., editor config)
+*.user
+*.userprefs
